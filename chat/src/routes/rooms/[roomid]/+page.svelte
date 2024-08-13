@@ -29,7 +29,7 @@
 	};
 
 	const fetch = async () => {
-		const response = await supabase.from('chats').select().eq('rooms_id', data.id);
+		const response = await supabase.from('chats').select().eq('room_id', data.id);
 		chats = response.data;
 	};
 </script>
@@ -56,8 +56,8 @@
 	<table class="border-collapse border-spacing-6 border border-slate-500">
 		<thead>
 			<th class="px-4">id</th>
-			<th class="px-5">users_id</th>
-			<th class="px-5">rooms_id</th>
+			<th class="px-5">user_id</th>
+			<th class="px-5">room_id</th>
 			<th class="px-10">message</th>
 			<th>created_at</th>
 		</thead>
