@@ -1,17 +1,15 @@
 <script lang="ts">
-	import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
 	import { Button, Input, Label } from 'flowbite-svelte';
 	import type { PageData } from './$types';
-	import { createClient } from '@supabase/supabase-js';
-	import type { Database, Tables } from '$lib/types/supabase';
+	import type { Tables } from '$lib/types/supabase';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { get } from 'svelte/store';
+	import { supabase } from '$lib/store';
 
 	export let data: PageData;
 	let message: string;
 	let chats: Tables<'chats'>[] | null;
-
-	const supabase = createClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
 
 	onMount(async () => {
 		await fetch();
@@ -21,7 +19,7 @@
 		if (!message && !data?.id) {
 			return;
 		}
-		await supabase.from('chats').insert({
+		await get(supabase).from('chats').insert({
 			room_id: data.id,
 			message: message
 		});
@@ -29,7 +27,7 @@
 	};
 
 	const fetch = async () => {
-		const response = await supabase.from('chats').select().eq('room_id', data.id);
+		const response = await get(supabase).from('chats').select().eq('room_id', data.id);
 		chats = response.data;
 	};
 </script>

@@ -1,17 +1,15 @@
 <script lang="ts">
-	import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
 	import { Input, Label, Helper, Button } from 'flowbite-svelte';
-	import { createClient } from '@supabase/supabase-js';
 	import { onMount } from 'svelte';
-	import type { Database, Tables } from '$lib/types/supabase';
+	import type { Tables } from '$lib/types/supabase';
 	import { sha256 } from '$lib';
 	import { goto } from '$app/navigation';
+	import { get } from 'svelte/store';
+	import { supabase } from '$lib/store';
 
 	let rooms: Tables<'rooms'>[] | null = [];
 	let roomName: string;
 	let roomPassword: string;
-
-	const supabase = createClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
 
 	onMount(async () => {
 		await fetch();
@@ -22,12 +20,12 @@
 			return;
 		}
 		const passwordHash = roomPassword ? await sha256(roomPassword) : '';
-		await supabase.from('rooms').insert({ name: roomName, password: passwordHash });
+		await get(supabase).from('rooms').insert({ name: roomName, password: passwordHash });
 		await fetch();
 	};
 
 	const fetch = async () => {
-		const { data, error } = await supabase.from('rooms').select();
+		const { data, error } = await get(supabase).from('rooms').select();
 		rooms = data;
 	};
 </script>
