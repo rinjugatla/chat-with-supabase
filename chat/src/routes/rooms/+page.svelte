@@ -76,7 +76,7 @@
 						<td>{room.id}</td>
 						<td>{room.name}</td>
 						<td>{room.created_at}</td>
-						<th><Button on:click={() => goto(`rooms/${room.id}`)}>Enter</Button></th>
+						<th><Button on:click={async () => await goto(`rooms/${room.id}`)}>Enter</Button></th>
 					</tr>
 				{/each}
 			{/if}
