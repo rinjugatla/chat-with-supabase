@@ -77,7 +77,8 @@
 			<th class="px-4">id</th>
 			<th class="px-10">name</th>
 			<th>created_at</th>
-			<th class="px-6">enter</th>
+			<th class="px-6">db</th>
+			<th class="px-6">presence</th>
 		</thead>
 		<tbody>
 			{#if rooms}
@@ -86,7 +87,8 @@
 						<td>{room.id}</td>
 						<td>{room.name}</td>
 						<td>{room.created_at}</td>
-						<th><Button on:click={async () => await goto(`rooms/${room.id}`)}>Enter</Button></th>
+						<th><Button on:click={async () => await goto(`rooms/db/${room.id}`)}>Enter</Button></th>
+						<th><Button on:click={async () => await goto(`rooms/presence/${room.id}`)}>Enter</Button></th>
 					</tr>
 				{/each}
 			{/if}
