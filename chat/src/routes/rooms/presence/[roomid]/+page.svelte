@@ -67,6 +67,10 @@
 			return;
 		}
 
+		// 自分のチャットはpresenceで受信しないのでここで履歴に加える
+		chats.push(message);
+		chats = chats;
+
 		messageChannel.send({
 			type: 'broadcast',
 			event: 'test',
