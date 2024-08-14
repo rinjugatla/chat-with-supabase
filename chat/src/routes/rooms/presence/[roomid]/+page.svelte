@@ -9,13 +9,37 @@
 	import { uuid } from '$lib';
 
 	export let data: PageData;
+	/**
+	 * ランダムなID()
+	 */
 	let myid = uuid();
+	/**
+	 * 入力中のチャット
+	 */
 	let message: string;
+	/**
+	 * チャット履歴
+	 */
 	let chats: string[] = [];
+	/**
+	 * チャット通知
+	 */
 	let messageChannel: RealtimeChannel;
+	/**
+	 * 状態通知
+	 */
 	let stateChannel: RealtimeChannel;
+	/**
+	 * 入室中のユーザ数
+	 */
 	let joinedUsers: number = 0;
+	/**
+	 * 他ユーザの入力中カウント
+	 */
 	let otherInputCount = 0;
+	/**
+	 * 他のユーザが入力中か
+	 */
 	$: isInputOther = otherInputCount > 0;
 
 	onMount(async () => {
