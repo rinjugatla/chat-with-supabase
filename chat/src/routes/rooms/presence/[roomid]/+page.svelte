@@ -15,8 +15,8 @@
 	let messageChannel: RealtimeChannel;
 	let stateChannel: RealtimeChannel;
 	let joinedUsers: number = 0;
-	$: inputOther = inputOtherCount > 0;
-	let inputOtherCount = 0;
+	let otherInputCount = 0;
+	$: isInputOther = otherInputCount > 0;
 
 	onMount(async () => {
 		messageChannel = get(supabase).channel(`room-${data.id}-message`);
@@ -34,13 +34,14 @@
 	const recieveMessage = () => {
 		messageChannel
 			.on('broadcast', { event: 'send' }, (payload) => {
-				console.log(payload);
 				chats.push(payload.payload.message);
 				chats = chats;
 			})
 			.on('broadcast', { event: 'input' }, (payload) => {
-				inputOtherCount += 1;
-				setTimeout(() => {inputOtherCount > 0 ? inputOtherCount -= 1 : inputOtherCount = 0}, 1000);
+				// 直接ユーザ入力を0, 1で管理するとsetTimeoutでラベルが即座に消えてしまうため
+				// 入力に対してカウントしてラベルの表示を維持する
+				otherInputCount += 1;
+				setTimeout(() => {otherInputCount > 0 ? otherInputCount -= 1 : otherInputCount = 0}, 1000);
 			})
 			.subscribe();
 	};
@@ -99,7 +100,7 @@
 <div>
 	<div>Users: {joinedUsers}</div>
 	<div>Current ID: {myid}</div>
-	<div class:hidden={!inputOther}>Input other...</div>
+	<div class:hidden={!isInputOther}>Input other...</div>
 </div>
 <Button on:click={async () => await goto('/rooms')}>Back to rooms</Button>
 
