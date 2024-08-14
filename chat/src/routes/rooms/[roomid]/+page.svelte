@@ -13,7 +13,20 @@
 
 	onMount(async () => {
 		await fetch();
+		listen();
 	});
+
+	const listen = () => {
+		get(supabase).channel("chats").on("postgres_changes", {
+			event: "INSERT",
+			schema: "public",
+			table: "chats"
+		}, (payload) => {
+			const newChat = payload.new as Tables<"chats">;
+			const newChats = chats ? [...chats, newChat] : [newChat]
+			chats = newChats.sort((a, b) => a.id - b.id);
+		}).subscribe();
+	}
 
 	const insert = async () => {
 		if (!message && !data?.id) {
@@ -23,7 +36,6 @@
 			room_id: data.id,
 			message: message
 		});
-		await fetch();
 	};
 
 	const fetch = async () => {

@@ -13,7 +13,20 @@
 
 	onMount(async () => {
 		await fetch();
+		listen();
 	});
+
+	const listen = () => {
+		get(supabase).channel("rooms").on("postgres_changes", {
+			event: "INSERT",
+			schema: "public",
+			table: "rooms"
+		}, (payload) => {
+			const newRoom = payload.new as Tables<"rooms">;
+			const newRooms = rooms ? [...rooms, newRoom] : [newRoom]
+			rooms = newRooms.sort((a, b) => a.id - b.id);
+		}).subscribe();
+	}
 
 	const insert = async () => {
 		if (!roomName) {
@@ -21,7 +34,6 @@
 		}
 		const passwordHash = roomPassword ? await sha256(roomPassword) : '';
 		await get(supabase).from('rooms').insert({ name: roomName, password: passwordHash });
-		await fetch();
 	};
 
 	const fetch = async () => {
