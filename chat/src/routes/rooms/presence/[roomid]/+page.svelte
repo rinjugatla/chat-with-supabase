@@ -15,6 +15,8 @@
 	let messageChannel: RealtimeChannel;
 	let stateChannel: RealtimeChannel;
 	let joinedUsers: number = 0;
+	$: inputOther = inputOtherCount > 0;
+	let inputOtherCount = 0;
 
 	onMount(async () => {
 		messageChannel = get(supabase).channel(`room-${data.id}-message`);
@@ -31,10 +33,14 @@
 
 	const recieveMessage = () => {
 		messageChannel
-			.on('broadcast', { event: 'test' }, (payload) => {
+			.on('broadcast', { event: 'send' }, (payload) => {
 				console.log(payload);
 				chats.push(payload.payload.message);
 				chats = chats;
+			})
+			.on('broadcast', { event: 'input' }, (payload) => {
+				inputOtherCount += 1;
+				setTimeout(() => {inputOtherCount > 0 ? inputOtherCount -= 1 : inputOtherCount = 0}, 1000);
 			})
 			.subscribe();
 	};
@@ -62,6 +68,17 @@
 		});
 	};
 
+	const inputMessage = () => {
+		if (!message && !data?.id) {
+			return;
+		}
+
+		messageChannel.send({
+			type: 'broadcast',
+			event: 'input'
+		});
+	}
+
 	const sendMessage = async () => {
 		if (!message && !data?.id) {
 			return;
@@ -73,7 +90,7 @@
 
 		messageChannel.send({
 			type: 'broadcast',
-			event: 'test',
+			event: 'send',
 			payload: { message: message }
 		});
 	};
@@ -82,6 +99,7 @@
 <div>
 	<div>Users: {joinedUsers}</div>
 	<div>Current ID: {myid}</div>
+	<div class:hidden={!inputOther}>Input other...</div>
 </div>
 <Button on:click={async () => await goto('/rooms')}>Back to rooms</Button>
 
@@ -89,7 +107,7 @@
 	<div class="flex">
 		<div class="flex">
 			<Label for="message" class="mx-2 content-center">message</Label>
-			<Input type="text" id="message" placeholder="text" bind:value={message} required />
+			<Input type="text" id="message" placeholder="text" bind:value={message} on:keypress={inputMessage} required />
 		</div>
 		<Button
 			type="submit"
