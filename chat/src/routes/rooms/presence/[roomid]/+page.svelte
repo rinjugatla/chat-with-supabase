@@ -55,6 +55,9 @@
 		await stateChannel?.untrack();
 	});
 
+	/**
+	 * チャットを受信
+	 */
 	const recieveMessage = () => {
 		messageChannel
 			.on('broadcast', { event: 'send' }, (payload) => {
@@ -70,6 +73,9 @@
 			.subscribe();
 	};
 
+	/**
+	 * ユーザの状態を受信
+	 */
 	const recieveState = () => {
 		stateChannel
 			.on('presence', { event: 'sync' }, () => {
@@ -86,6 +92,9 @@
 			.subscribe();
 	};
 
+	/**
+	 * ユーザの状態を送信(入室)
+	 */
 	const sendState = () => {
 		stateChannel.track({
 			user: myid,
@@ -93,6 +102,9 @@
 		});
 	};
 
+	/**
+	 * メッセージの入力(状態の通知)
+	 */
 	const inputMessage = () => {
 		if (!message && !data?.id) {
 			return;
@@ -104,6 +116,9 @@
 		});
 	}
 
+	/**
+	 * メッセージの送信
+	 */
 	const sendMessage = async () => {
 		if (!message && !data?.id) {
 			return;
