@@ -11,23 +11,45 @@
 	export let data: PageData;
 	let message: string;
 	let chats: Tables<'chats'>[] | null;
+	let myId: string | undefined = undefined;
 
 	onMount(async () => {
+		myId = (await supabaseUser()).data.user?.id;
+
 		await fetch();
 		listen();
 	});
 
 	const listen = () => {
-		get(supabase).channel("chats").on("postgres_changes", {
-			event: "INSERT",
-			schema: "public",
-			table: "chats"
-		}, (payload) => {
-			const newChat = payload.new as Tables<"chats">;
-			const newChats = chats ? [...chats, newChat] : [newChat]
-			chats = newChats.sort((a, b) => a.id - b.id);
-		}).subscribe();
-	}
+		get(supabase)
+			.channel('chats-change')
+			.on(
+				'postgres_changes',
+				{
+					event: 'INSERT',
+					schema: 'public',
+					table: 'chats'
+				},
+				(payload) => {
+					const newChat = payload.new as Tables<'chats'>;
+					const newChats = chats ? [...chats, newChat] : [newChat];
+					chats = newChats.sort((a, b) => a.id - b.id);
+				}
+			)
+			.on(
+				'postgres_changes',
+				{
+					event: 'DELETE',
+					schema: 'public',
+					table: 'chats'
+				},
+				(payload) => {
+					const deletedId = payload.old.id;
+					chats = chats ? chats?.filter(chat => chat.id !== deletedId): [];
+				}
+			)
+			.subscribe();
+	};
 
 	const insert = async () => {
 		if (!message && !data?.id) {
@@ -44,6 +66,14 @@
 	const fetch = async () => {
 		const response = await get(supabase).from('chats').select().eq('room_id', data.id);
 		chats = response.data;
+	};
+
+	const deleteChat = async (id: number) => {
+		if (!myId) {
+			return;
+		}
+
+		await get(supabase).from('chats').delete().eq('user_id', myId).eq('id', id);
 	};
 </script>
 
@@ -73,6 +103,7 @@
 			<th class="px-5">room_id</th>
 			<th class="px-10">message</th>
 			<th>created_at</th>
+			<th>Delete</th>
 		</thead>
 		<tbody>
 			{#if chats}
@@ -83,6 +114,16 @@
 						<td>{chat.room_id}</td>
 						<td>{chat.message}</td>
 						<td>{chat.created_at}</td>
+						<td>
+							{#if chat.user_id === myId}
+								<Button
+									color="red"
+									on:click={async () => {
+										deleteChat(chat.id);
+									}}>Delete</Button
+								>
+							{/if}
+						</td>
 					</tr>
 				{/each}
 			{/if}
