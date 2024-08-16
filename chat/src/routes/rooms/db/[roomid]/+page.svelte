@@ -2,16 +2,18 @@
 	import { Button, Input, Label } from 'flowbite-svelte';
 	import type { PageData } from './$types';
 	import type { Tables } from '$lib/types/supabase';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { get } from 'svelte/store';
 	import { supabase } from '$lib/store';
 	import { supabaseUser } from '$lib/index';
+	import type { RealtimeChannel } from '@supabase/supabase-js';
 
 	export let data: PageData;
 	let message: string;
 	let chats: Tables<'chats'>[] | null;
 	let myId: string | undefined = undefined;
+	let chatChangeChannel: RealtimeChannel;
 
 	onMount(async () => {
 		myId = (await supabaseUser()).data.user?.id;
@@ -20,8 +22,12 @@
 		listen();
 	});
 
+	onDestroy(async () => {
+		await chatChangeChannel?.unsubscribe();
+	});
+
 	const listen = () => {
-		get(supabase)
+		chatChangeChannel = get(supabase)
 			.channel('chats-change')
 			.on(
 				'postgres_changes',

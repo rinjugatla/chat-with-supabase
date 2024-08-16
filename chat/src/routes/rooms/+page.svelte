@@ -1,23 +1,29 @@
 <script lang="ts">
 	import { Input, Label, Helper, Button } from 'flowbite-svelte';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import type { Tables } from '$lib/types/supabase';
 	import { sha256 } from '$lib';
 	import { goto } from '$app/navigation';
 	import { get } from 'svelte/store';
 	import { supabase } from '$lib/store';
+	import type { RealtimeChannel } from '@supabase/supabase-js';
 
 	let rooms: Tables<'rooms'>[] | null = [];
 	let roomName: string;
 	let roomPassword: string;
+	let roomChangeChannel: RealtimeChannel;
 
 	onMount(async () => {
 		await fetch();
 		listen();
 	});
 
+	onDestroy(async() => {
+		await roomChangeChannel?.unsubscribe();
+	})
+
 	const listen = () => {
-		get(supabase).channel("rooms").on("postgres_changes", {
+		roomChangeChannel = get(supabase).channel("rooms").on("postgres_changes", {
 			event: "INSERT",
 			schema: "public",
 			table: "rooms"

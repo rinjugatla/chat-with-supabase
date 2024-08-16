@@ -53,6 +53,8 @@
 
 	onDestroy(async () => {
 		await stateChannel?.untrack();
+		await messageChannel?.unsubscribe();
+		await stateChannel?.unsubscribe();
 	});
 
 	/**
