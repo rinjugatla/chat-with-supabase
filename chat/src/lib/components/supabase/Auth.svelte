@@ -7,10 +7,10 @@
 
 	const dispatch = createEventDispatcher();
 
-    let email = '';
+	let email = '';
 	let password = '';
 	let localSession: Session | null = null;
-    /**
+	/**
 	 * 現在サインイン中か
 	 */
 	$: isSignIned = !!localSession;
@@ -101,67 +101,46 @@
 			}}>Signout</Button
 		>
 	{:else}
-		<div class="flex"></div>
-		{#if signMode === 'in'}
-			<form
-				on:submit|preventDefault={async () => {
+		<form
+			on:submit|preventDefault={async () => {
+				if (signMode === 'in') {
 					signInWithEmail();
-				}}
-			>
-				<div class="flex">
-					<Label for="email" class="mx-2 content-center">Email address</Label>
-					<Input type="text" id="email" placeholder="Email address" bind:value={email} required />
-				</div>
-				<div class="flex">
-					<Label for="password" class="mx-2 content-center">Your Password</Label>
-					<Input
-						type="password"
-						id="password"
-						placeholder="Your Password"
-						bind:value={password}
-						required
-					/>
-				</div>
-				<div class="flex gap-2">
-					<Button type="submit">Sign In</Button>
-					<Button
-						color="green"
-						on:click={() => {
-							signMode = 'up';
-						}}>Sign Up</Button
-					>
-				</div>
-			</form>
-		{:else}
-			<form
-				on:submit|preventDefault={async () => {
-					await signUpWithEmail();
-				}}
-			>
-				<div class="flex">
-					<Label for="email" class="mx-2 content-center">Email address</Label>
-					<Input type="text" id="email" placeholder="Email address" bind:value={email} required />
-				</div>
-				<div class="flex">
-					<Label for="password" class="mx-2 content-center">Create Password</Label>
-					<Input
-						type="password"
-						id="password"
-						placeholder="Create Password"
-						bind:value={password}
-						required
-					/>
-				</div>
-				<div class="flex gap-2">
-					<Button type="submit">Sign Up</Button>
-					<Button
-						color="green"
-						on:click={() => {
-							signMode = 'in';
-						}}>Sign In</Button
-					>
-				</div>
-			</form>
-		{/if}
+				} else {
+					signUpWithEmail();
+				}
+			}}
+		>
+			<div class="flex">
+				<Label for="email" class="mx-2 content-center">Email</Label>
+				<Input type="text" id="email" placeholder="Email" bind:value={email} required />
+			</div>
+			<div class="mt-2 flex">
+				<Label for="password" class="mx-2 content-center">Password</Label>
+				<Input
+					type="password"
+					id="password"
+					placeholder="Password"
+					bind:value={password}
+					required
+				/>
+			</div>
+			<div class="m-2 flex gap-2">
+				<Button
+					class="w-full"
+					type="submit"
+					on:click={() => {
+						signMode = 'in';
+					}}>Sign In</Button
+				>
+				<Button
+					class="w-40"
+					type="submit"
+					color="green"
+					on:click={() => {
+						signMode = 'up';
+					}}>Sign Up</Button
+				>
+			</div>
+		</form>
 	{/if}
 </div>
