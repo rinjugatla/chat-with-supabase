@@ -1,3 +1,6 @@
+import { get } from "svelte/store"
+import { supabase } from "./store"
+
 export const sha256 = async (text: string) => {
     const uint8 = new TextEncoder().encode(text)
     const digest = await crypto.subtle.digest('SHA-256', uint8)
@@ -15,4 +18,9 @@ export const uuid = () => {
         uuid += (i == 12 ? 4 : (i == 16 ? (random & 3 | 8) : random)).toString(16);
     }
     return uuid;
+}
+
+export const supabaseUser = async () => {
+    const user = await get(supabase).auth.getUser();
+    return user;
 }

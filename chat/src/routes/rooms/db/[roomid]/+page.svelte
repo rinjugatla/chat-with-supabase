@@ -6,6 +6,7 @@
 	import { goto } from '$app/navigation';
 	import { get } from 'svelte/store';
 	import { supabase } from '$lib/store';
+	import { supabaseUser } from '$lib/index';
 
 	export let data: PageData;
 	let message: string;
@@ -32,8 +33,10 @@
 		if (!message && !data?.id) {
 			return;
 		}
+
 		await get(supabase).from('chats').insert({
 			room_id: data.id,
+			user_id: (await supabaseUser()).data.user?.id,
 			message: message
 		});
 	};
