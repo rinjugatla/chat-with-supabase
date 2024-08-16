@@ -5,14 +5,15 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { get } from 'svelte/store';
 
-	let email = '';
+	const dispatch = createEventDispatcher();
+
+    let email = '';
 	let password = '';
 	let localSession: Session | null = null;
-	const dispatch = createEventDispatcher();
-	/**
+    /**
 	 * 現在サインイン中か
 	 */
-	export let isSignIned = !!localSession;
+	$: isSignIned = !!localSession;
 	/**
 	 * サインインモード
 	 */
@@ -31,7 +32,7 @@
 		localSession = _session;
 		session.set(_session);
 
-		if (isSignIned) {
+		if (_session) {
 			dispatch('signin');
 		} else {
 			dispatch('signout');
