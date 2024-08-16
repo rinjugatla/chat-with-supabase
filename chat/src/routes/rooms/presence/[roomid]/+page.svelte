@@ -70,7 +70,9 @@
 				// 直接ユーザ入力を0, 1で管理するとsetTimeoutでラベルが即座に消えてしまうため
 				// 入力に対してカウントしてラベルの表示を維持する
 				otherInputCount += 1;
-				setTimeout(() => {otherInputCount > 0 ? otherInputCount -= 1 : otherInputCount = 0}, 1000);
+				setTimeout(() => {
+					otherInputCount > 0 ? (otherInputCount -= 1) : (otherInputCount = 0);
+				}, 1000);
 			})
 			.subscribe();
 	};
@@ -116,7 +118,7 @@
 			type: 'broadcast',
 			event: 'input'
 		});
-	}
+	};
 
 	/**
 	 * メッセージの送信
@@ -149,7 +151,14 @@
 	<div class="flex">
 		<div class="flex">
 			<Label for="message" class="mx-2 content-center">message</Label>
-			<Input type="text" id="message" placeholder="text" bind:value={message} on:keypress={inputMessage} required />
+			<Input
+				type="text"
+				id="message"
+				placeholder="text"
+				bind:value={message}
+				on:keypress={inputMessage}
+				required
+			/>
 		</div>
 		<Button
 			type="submit"

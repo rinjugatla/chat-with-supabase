@@ -18,21 +18,28 @@
 		listen();
 	});
 
-	onDestroy(async() => {
+	onDestroy(async () => {
 		await roomChangeChannel?.unsubscribe();
-	})
+	});
 
 	const listen = () => {
-		roomChangeChannel = get(supabase).channel("rooms").on("postgres_changes", {
-			event: "INSERT",
-			schema: "public",
-			table: "rooms"
-		}, (payload) => {
-			const newRoom = payload.new as Tables<"rooms">;
-			const newRooms = rooms ? [...rooms, newRoom] : [newRoom]
-			rooms = newRooms.sort((a, b) => a.id - b.id);
-		}).subscribe();
-	}
+		roomChangeChannel = get(supabase)
+			.channel('rooms')
+			.on(
+				'postgres_changes',
+				{
+					event: 'INSERT',
+					schema: 'public',
+					table: 'rooms'
+				},
+				(payload) => {
+					const newRoom = payload.new as Tables<'rooms'>;
+					const newRooms = rooms ? [...rooms, newRoom] : [newRoom];
+					rooms = newRooms.sort((a, b) => a.id - b.id);
+				}
+			)
+			.subscribe();
+	};
 
 	const insert = async () => {
 		if (!roomName) {
@@ -68,7 +75,7 @@
 			</div>
 			<Button
 				type="submit"
-                class="mx-2"
+				class="mx-2"
 				on:click={async () => {
 					await insert();
 				}}>Submit</Button
@@ -94,7 +101,10 @@
 						<td>{room.name}</td>
 						<td>{room.created_at}</td>
 						<th><Button on:click={async () => await goto(`rooms/db/${room.id}`)}>Enter</Button></th>
-						<th><Button on:click={async () => await goto(`rooms/presence/${room.id}`)}>Enter</Button></th>
+						<th
+							><Button on:click={async () => await goto(`rooms/presence/${room.id}`)}>Enter</Button
+							></th
+						>
 					</tr>
 				{/each}
 			{/if}

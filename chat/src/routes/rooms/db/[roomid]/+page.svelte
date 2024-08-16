@@ -51,7 +51,7 @@
 				},
 				(payload) => {
 					const deletedId = payload.old.id;
-					chats = chats ? chats?.filter(chat => chat.id !== deletedId): [];
+					chats = chats ? chats?.filter((chat) => chat.id !== deletedId) : [];
 				}
 			)
 			.subscribe();
