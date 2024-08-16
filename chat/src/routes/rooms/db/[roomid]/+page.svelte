@@ -56,11 +56,13 @@
 			return;
 		}
 
-		await get(supabase).from('chats').insert({
-			room_id: data.id,
-			user_id: (await supabaseUser()).data.user?.id,
-			message: message
-		});
+		await get(supabase)
+			.from('chats')
+			.insert({
+				room_id: data.id,
+				user_id: (await supabaseUser()).data.user?.id,
+				message: message
+			});
 	};
 
 	const fetch = async () => {
@@ -87,7 +89,7 @@
 		</div>
 		<Button
 			type="submit"
-            class="mx-2"
+			class="mx-2"
 			on:click={async () => {
 				await insert();
 			}}>Submit</Button
