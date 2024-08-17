@@ -22,13 +22,9 @@
 	 */
 	let chats: string[] = [];
 	/**
-	 * チャット通知
+	 * メッセージ、ステートの共有
 	 */
-	let messageChannel: RealtimeChannel;
-	/**
-	 * 状態通知
-	 */
-	let stateChannel: RealtimeChannel;
+	let roomChannel: RealtimeChannel;
 	/**
 	 * 入室中のユーザ数
 	 */
@@ -43,25 +39,31 @@
 	$: isInputOther = otherInputCount > 0;
 
 	onMount(async () => {
-		messageChannel = get(supabase).channel(`room-${data.id}-message`);
-		stateChannel = get(supabase).channel(`room-${data.id}-state`);
-
-		recieveMessage();
-		recieveState();
+		subscribeChannel();
 		sendState();
 	});
 
 	onDestroy(async () => {
-		await stateChannel?.untrack();
-		await messageChannel?.unsubscribe();
-		await stateChannel?.unsubscribe();
+		await unsubscribeChannel();
 	});
+
+	const subscribeChannel = () => {
+		roomChannel = get(supabase).channel(`room-${data.id}`);
+		recieveMessage();
+		recieveState();
+		roomChannel.subscribe();
+	}
+
+	const unsubscribeChannel = async () => {
+		await roomChannel?.untrack();
+		await roomChannel?.unsubscribe();
+	}
 
 	/**
 	 * チャットを受信
 	 */
 	const recieveMessage = () => {
-		messageChannel
+		roomChannel
 			.on('broadcast', { event: 'send' }, (payload) => {
 				chats.push(payload.payload.message);
 				chats = chats;
@@ -73,17 +75,16 @@
 				setTimeout(() => {
 					otherInputCount > 0 ? (otherInputCount -= 1) : (otherInputCount = 0);
 				}, 1000);
-			})
-			.subscribe();
+			});
 	};
 
 	/**
 	 * ユーザの状態を受信
 	 */
 	const recieveState = () => {
-		stateChannel
+		roomChannel
 			.on('presence', { event: 'sync' }, () => {
-				const newState = stateChannel.presenceState();
+				const newState = roomChannel.presenceState();
 				joinedUsers = Object.keys(newState).length;
 				// console.log('sync', newState);
 			})
@@ -92,15 +93,14 @@
 			})
 			.on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
 				// console.log('leave', key, leftPresences);
-			})
-			.subscribe();
+			});
 	};
 
 	/**
 	 * ユーザの状態を送信(入室)
 	 */
 	const sendState = () => {
-		stateChannel.track({
+		roomChannel.track({
 			user: myid,
 			online_at: new Date().toISOString()
 		});
@@ -114,7 +114,7 @@
 			return;
 		}
 
-		messageChannel.send({
+		roomChannel.send({
 			type: 'broadcast',
 			event: 'input'
 		});
@@ -132,7 +132,7 @@
 		chats.push(message);
 		chats = chats;
 
-		messageChannel.send({
+		roomChannel.send({
 			type: 'broadcast',
 			event: 'send',
 			payload: { message: message }
